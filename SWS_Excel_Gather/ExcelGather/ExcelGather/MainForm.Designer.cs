@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.label1 = new System.Windows.Forms.Label();
             this.buttonDir = new System.Windows.Forms.Button();
             this.textBoxDir = new System.Windows.Forms.TextBox();
@@ -122,6 +123,7 @@
             this.Controls.Add(this.textBoxDir);
             this.Controls.Add(this.buttonDir);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";

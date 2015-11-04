@@ -47,7 +47,7 @@ namespace ExcelGather
             int gsyh = 0;
             int zxyh = 0;
             int xyyh = 0;
-            int zsyh = 0;
+            int zsyh = 0; 
 
             DirectoryInfo dir = new DirectoryInfo(dirPath);
 
@@ -66,8 +66,14 @@ namespace ExcelGather
 
                     for (var i = 0; i < 34; i++)
                     {
-                        columnValues_1[i] += sheet.Cells[i + 3, 2].IntValue;
-                        columnValues_2[i] += sheet.Cells[i + 3, 9].IntValue;
+                        if (sheet.Cells[i + 3, 2].Value != null)
+                        {
+                            columnValues_1[i] += sheet.Cells[i + 3, 2].IntValue;
+                        }
+                        if (sheet.Cells[i + 3, 9].Value != null)
+                        {
+                            columnValues_2[i] += sheet.Cells[i + 3, 9].IntValue;
+                        }
                     }
 
                     int current_gsyh = ConvertNumber(sheet.Cells[2, 16].StringValue);
@@ -87,7 +93,7 @@ namespace ExcelGather
             }
 
             //Load the template and fill it will the result data. Then save it to the specified folder with name "Result.xls"
-            Workbook resultWorkbook = new Workbook("营业部编码+营业部全称资料领取表-样表.xls");
+            Workbook resultWorkbook = new Workbook("Template.xls");
             Worksheet resultSheet = resultWorkbook.Worksheets[0];
 
             for (var i = 0; i < 34; i++)
@@ -105,8 +111,13 @@ namespace ExcelGather
         }
         private int ConvertNumber(string rawText)
         {
+            if (string.IsNullOrEmpty(rawText) || rawText.Equals("本"))
+            {
+                return 0;
+            }
             if (rawText.EndsWith("本"))
             {
+
                 return Convert.ToInt32(rawText.Substring(0, rawText.Length - 1));
             }
             return Convert.ToInt32(rawText);
