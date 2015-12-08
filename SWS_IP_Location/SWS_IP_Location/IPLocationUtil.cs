@@ -59,7 +59,7 @@ namespace SWS_IP_Location
                 }
                 catch (Exception ex)
                 {
-
+                    throw ex;
                 }
             }
             return result;

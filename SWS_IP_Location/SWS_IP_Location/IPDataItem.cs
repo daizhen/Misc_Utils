@@ -23,6 +23,5 @@ namespace SWS_IP_Location
             get;
             set;
         }
-
     }
 }
