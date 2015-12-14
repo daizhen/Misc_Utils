@@ -28,11 +28,20 @@ namespace ExcelGather
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (GetherData(textBoxDir.Text, textBoxDestDir.Text))
-            {
-                MessageBox.Show("操作成功");
-            }
-        }
+			string folder = @"C:\Users\dz\Downloads\凭证购买2015\{0}月凭证领用";
+			string resultFileName = "2015.xls";
+
+			int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
+			foreach (int month in monthList)
+			{
+				var items = GroupHandler.LoadItems(month, string.Format(folder, month));
+				GroupHandler.Export(items, resultFileName, month);
+			}
+			//if (GetherData(textBoxDir.Text, textBoxDestDir.Text))
+			//{
+			//	MessageBox.Show("操作成功");
+			//}
+		}
 
         private bool GetherData(string dirPath,string destDirPath)
         {
@@ -61,7 +70,8 @@ namespace ExcelGather
 
                 try
                 {
-                    Workbook currentWorkbook = new Workbook(file.FullName);
+					Workbook currentWorkbook = new Workbook();
+					currentWorkbook.Open(file.FullName);
                     Worksheet sheet = currentWorkbook.Worksheets[0];
 
                     for (var i = 0; i < 34; i++)
@@ -93,19 +103,20 @@ namespace ExcelGather
             }
 
             //Load the template and fill it will the result data. Then save it to the specified folder with name "Result.xls"
-            Workbook resultWorkbook = new Workbook("Template.xls");
+            Workbook resultWorkbook = new Workbook();
+			resultWorkbook.Open("Template.xls");
+
             Worksheet resultSheet = resultWorkbook.Worksheets[0];
 
             for (var i = 0; i < 34; i++)
             {
-                resultSheet.Cells[i + 3, 2].Value = columnValues_1[i];
-                resultSheet.Cells[i + 3, 9].Value = columnValues_2[i];
+                resultSheet.Cells[i + 3, 2].PutValue( columnValues_1[i]);
+                resultSheet.Cells[i + 3, 9].PutValue( columnValues_2[i]);
             }
-
-            resultSheet.Cells[2, 16].Value = gsyh + "本";
-            resultSheet.Cells[3, 16].Value = zxyh + "本";
-            resultSheet.Cells[4, 16].Value = xyyh + "本";
-            resultSheet.Cells[5, 16].Value = zsyh + "本";
+            resultSheet.Cells[2, 16].PutValue(gsyh + "本");
+            resultSheet.Cells[3, 16].PutValue(zxyh + "本");
+            resultSheet.Cells[4, 16].PutValue(xyyh + "本");
+            resultSheet.Cells[5, 16].PutValue(zsyh + "本");
             resultWorkbook.Save(destDirPath + "\\Result.xls");
             return true;
         }
