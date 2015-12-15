@@ -35,6 +35,23 @@ namespace ExcelGather
 			return branches;
 		}
 
+		public static Dictionary<string, int> LoadBrancheFullNameIds()
+		{
+			string fileName = "allbranch.xls";
+			Dictionary<string, int> branches = new Dictionary<string, int>();
+
+			Workbook currentWorkbook = new Workbook();
+			currentWorkbook.Open(fileName);
+			Worksheet sheet = currentWorkbook.Worksheets[0];
+
+			for (var i = 1; i < 127; i++)
+			{
+				string netName = sheet.Cells[i, 1].StringValue;
+				branches.Add(netName, sheet.Cells[i, 0].IntValue);
+			}
+			return branches;
+		} 
+
 		public static Dictionary<int, string> LoadBrancheIdNames()
 		{
 			string fileName = "allbranch.xls";
@@ -209,9 +226,13 @@ namespace ExcelGather
 			{
 				var list = items.FindAll(p => p.SerialNum == sheetSummary.Cells[i, 0].StringValue);
 				double resultValue =Sum(list);
-				if(resultValue!=0)
+				if (resultValue != 0)
 				{
 					sheetSummary.Cells[i, month + 1].PutValue(resultValue);
+				}
+				else
+				{
+					sheetSummary.Cells[i, month + 1].PutValue(null);
 				}
 			}
 			currentWorkbook.Save(fileName);
@@ -300,6 +321,25 @@ namespace ExcelGather
 			value = simility;
 			return branchId;
 		}
-	
+
+
+		public static List<RequestItem> LoadMonthData(Worksheet sheet)
+		{
+			List<RequestItem> items = new List<RequestItem>();
+
+			Dictionary<string, int> branches = LoadBrancheFullNameIds();
+			int rowIndex = 1;
+			while (sheet.Cells[rowIndex, 2].Value != null)
+			{
+				RequestItem item = new RequestItem();
+				item.FileName = sheet.Cells[rowIndex, 2].StringValue;
+				item.SerialNum = branches[item.FileName].ToString();
+				item.Money = sheet.Cells[rowIndex, 4].DoubleValue;
+				items.Add(item);
+				rowIndex++;
+			}
+
+			return items;
+		}
 	}
 }

@@ -28,14 +28,25 @@ namespace ExcelGather
 
         private void button1_Click(object sender, EventArgs e)
         {
-			string folder = @"C:\Users\dz\Downloads\凭证购买2015\{0}月凭证领用";
-			string resultFileName = "2015.xls";
+
+
+
+			Workbook currentWorkbook = new Workbook();
+			currentWorkbook.Open("2015_New.xls");
 
 			int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
+			
+
+
+			//string folder = @"C:\Users\dz\Downloads\凭证购买2015\{0}月凭证领用";
+			//string resultFileName = "2015.xls";
+
+			//int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
 			foreach (int month in monthList)
 			{
-				var items = GroupHandler.LoadItems(month, string.Format(folder, month));
-				GroupHandler.Export(items, resultFileName, month);
+				Worksheet sheet = currentWorkbook.Worksheets[month + "月"];
+				var items = GroupHandler.LoadMonthData(sheet);
+				GroupHandler.Export(items, "2015_New2.xls", month);
 			}
 			//if (GetherData(textBoxDir.Text, textBoxDestDir.Text))
 			//{
@@ -143,5 +154,7 @@ namespace ExcelGather
             }
         }
        
+
+
     }
 }
