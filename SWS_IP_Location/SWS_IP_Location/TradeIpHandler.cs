@@ -28,6 +28,24 @@ namespace SWS_IP_Location
 			}
 		}
 
+        public static void ExtractMobilePhone(Worksheet sheet)
+        {
+            Regex ipReg = new Regex(@"(\[\d{11}\])");
+
+            int rowIndex = 1;
+            while (sheet.Cells[rowIndex, 2].Value != null)
+            {
+                string rawIpStr = sheet.Cells[rowIndex, 8].StringValue;
+                var matchResult = ipReg.Match(rawIpStr);
+                if (matchResult.Success)
+                {
+                    sheet.Cells[rowIndex, 1].PutValue(matchResult.Groups[0].Value);
+                }
+                rowIndex++;
+            }
+
+        }
+
 		public static List<string> GetAllIp(Worksheet sheet)
 		{
 			List<string> ipList = new List<string>();
