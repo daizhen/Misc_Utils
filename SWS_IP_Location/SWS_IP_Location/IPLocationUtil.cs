@@ -29,7 +29,8 @@ namespace SWS_IP_Location
                     TimeSpan d = s1 - s;
                     int i = (int)d.TotalSeconds;
 
-					string url = "http://opendata.baidu.com/api.php?query={0}&co=&resource_id=6006&t={1}&ie=utf8&oe=gbk&format=json&tn=baidu&_=1449537514110";
+					string url = "https://sp0.baidu.com/8aQDcjqpAAV3otqbppnN2DJv/api.php?query={0}&co=&resource_id=6006&t={1}&ie=utf8&oe=gbk&format=json&tn=baidu&_=1450279116567";
+						//"http://opendata.baidu.com/api.php?query={0}&co=&resource_id=6006&t={1}&ie=utf8&oe=gbk&format=json&tn=baidu&_=1449537514111";
 					HttpWebRequest request = WebRequest.Create(string.Format(url, ip,i)) as HttpWebRequest;
 					request.Method = "GET";
 					request.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
@@ -69,6 +70,40 @@ namespace SWS_IP_Location
 				output = Encoding.UTF8.GetString(ms.ToArray());
 			}
 			return output;
+		}
+
+
+		public static MobileResponseMessage GetMobileNumberInfo(string mobileNumber)
+		{
+			string url = "http://a.apix.cn/apixlife/phone/phone?phone={0}";
+			bool success = false;
+			MobileResponseMessage resultMessage = null;
+			while (!success)
+			{
+				try
+				{
+					HttpWebRequest request = WebRequest.Create(string.Format(url, mobileNumber)) as HttpWebRequest;
+					request.Method = "GET";
+					request.Accept = "application/json";
+					request.ContentType = "application/json";
+
+					request.Headers.Add("apix-key", "4e874ee92e5c42885e8a43796dd19491");
+
+					HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+					StreamReader reader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8);
+					string responseContent = reader.ReadToEnd();
+					reader.Close();
+
+					resultMessage = JsonToObject<MobileResponseMessage>(responseContent);
+					success = true;
+				}
+				catch (Exception ex)
+				{
+					success = false;
+					Thread.Sleep(500);
+				}
+			}
+			return resultMessage;
 		}
 
 		public static T JsonToObject<T>(string strJson) where T : class

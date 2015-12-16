@@ -49,11 +49,22 @@ namespace SWS_IP_Location
 
             //string result = IPLocationUtil.GetIPLocation("15.203.233.86");
             Workbook currentWorkbook = new Workbook();
-            currentWorkbook.Open("Trades_result.xls");
+			currentWorkbook.Open("Trades.xls");
 
             Worksheet sheet = currentWorkbook.Worksheets[0];
-            TradeIpHandler.ExtractIp(sheet);
-            currentWorkbook.Save("Trades_result.xls");
+            TradeIpHandler.ExtractMobilePhone(sheet);
+			currentWorkbook.Save("Trades.xls");
         }
+
+		private void buttonPhoneLocation_Click(object sender, EventArgs e)
+		{
+			//string result = IPLocationUtil.GetIPLocation("15.203.233.86");
+			Workbook currentWorkbook = new Workbook();
+			currentWorkbook.Open("Trades.xls");
+
+			Worksheet sheet = currentWorkbook.Worksheets[0];
+			TradeIpHandler.GetMobileLocation(sheet);
+			currentWorkbook.Save("Trades.xls");
+		}
     }
 }

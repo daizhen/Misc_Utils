@@ -56,8 +56,10 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="MobileDataItem.cs" />
     <Compile Include="IPDataItem.cs" />
     <Compile Include="IPLocationUtil.cs" />
+    <Compile Include="MobileResponseMessage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchMessage.cs" />
@@ -88,9 +90,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Trades.xls">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\Aspose.Cells.dll" />
