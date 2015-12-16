@@ -39,7 +39,7 @@ namespace SWS_IP_Location
                 var matchResult = ipReg.Match(rawIpStr);
                 if (matchResult.Success)
                 {
-                    sheet.Cells[rowIndex, 1].PutValue(matchResult.Groups[0].Value);
+                    sheet.Cells[rowIndex, 10].PutValue(matchResult.Groups[0].Value);
                 }
                 rowIndex++;
             }
