@@ -24,8 +24,13 @@ namespace SWS_IP_Location
 			{
 				try
 				{
-					string url = "http://opendata.baidu.com/api.php?query={0}&co=&resource_id=6006&t=1450193381884&ie=utf8&oe=gbk&format=json&tn=baidu&_=1449537514110";
-					HttpWebRequest request = WebRequest.Create(string.Format(url, ip)) as HttpWebRequest;
+                    DateTime s1 = DateTime.Now;
+                    DateTime s = new DateTime(1970, 1, 1);
+                    TimeSpan d = s1 - s;
+                    int i = (int)d.TotalSeconds;
+
+					string url = "http://opendata.baidu.com/api.php?query={0}&co=&resource_id=6006&t={1}&ie=utf8&oe=gbk&format=json&tn=baidu&_=1449537514110";
+					HttpWebRequest request = WebRequest.Create(string.Format(url, ip,i)) as HttpWebRequest;
 					request.Method = "GET";
 					request.Headers.Add("Accept-Encoding", "gzip,deflate,sdch");
 					request.Host = "sp0.baidu.com";

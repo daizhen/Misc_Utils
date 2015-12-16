@@ -13,7 +13,7 @@ namespace SWS_IP_Location
 	{
 		public static void ExtractIp(Worksheet sheet)
 		{
-			Regex ipReg = new Regex(@"((([1-9]?|1\d)\d|2([0-4]\d|5[0-5]))\.){3}(([1-9]?|1\d)\d|2([0-4]\d|5[0-5]))");
+            Regex ipReg = new Regex(@"((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))");
 
 			int rowIndex = 1;
 			while (sheet.Cells[rowIndex, 2].Value != null)
@@ -65,6 +65,28 @@ namespace SWS_IP_Location
 			}
 			return locationList;
 		}
+        public static void GetIpLocationList(Workbook workbook,string filePath )
+        {
+            Worksheet sheet = workbook.Worksheets[0];
+
+            List<string> locationList = new List<string>();
+
+            int rowIndex = 1;
+            while (sheet.Cells[rowIndex, 2].Value != null)
+            {
+                string ipaddress = sheet.Cells[rowIndex, 1].StringValue;
+                string result = IPLocationUtil.GetIPLocation(ipaddress);
+                sheet.Cells[rowIndex, 0].PutValue(result);
+                if (rowIndex % 10 == 0)
+                {
+                    workbook.Save(filePath);
+                }
+                Console.WriteLine(rowIndex);
+                rowIndex++;
+                Thread.Sleep(50);
+            }
+
+        }
 
 	}
 }

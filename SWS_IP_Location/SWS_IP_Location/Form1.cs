@@ -32,14 +32,15 @@ namespace SWS_IP_Location
 		{
 			Workbook currentWorkbook = new Workbook();
 			currentWorkbook.Open("Trades.xls");
-			Worksheet sheet = currentWorkbook.Worksheets[0];
+            TradeIpHandler.GetIpLocationList(currentWorkbook, "Trades_result.xls");
+			//Worksheet sheet = currentWorkbook.Worksheets[0];
 
-			List<string> ipAddressList = TradeIpHandler.GetAllIp(sheet);
-			List<string> ipLocationList = TradeIpHandler.GetIpLocationList(ipAddressList);
-			for(int i =0;i<ipLocationList.Count;i++)
-			{
-				sheet.Cells[i + 1, 0].PutValue(ipLocationList[i]);
-			}
+            //List<string> ipAddressList = TradeIpHandler.GetAllIp(sheet);
+            //List<string> ipLocationList = TradeIpHandler.GetIpLocationList(ipAddressList);
+            //for(int i =0;i<ipLocationList.Count;i++)
+            //{
+            //    sheet.Cells[i + 1, 0].PutValue(ipLocationList[i]);
+            //}
 
 		}
     }
