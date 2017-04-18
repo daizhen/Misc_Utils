@@ -30,7 +30,7 @@ namespace SWS_IP_Location
 
         public static void ExtractMobilePhone(Worksheet sheet)
         {
-			Regex ipReg = new Regex(@"\[(mt_)?(\d{11})\]");
+			Regex ipReg = new Regex(@"\[(mt_)?(\d{11})\]|MOBILE:(\d{11})");
 
             int rowIndex = 1;
             while (sheet.Cells[rowIndex, 2].Value != null)
@@ -52,7 +52,7 @@ namespace SWS_IP_Location
 			int rowIndex = 1;
 			while (sheet.Cells[rowIndex, 2].Value != null)
 			{
-				string mobileNumber = sheet.Cells[rowIndex, 10].StringValue;
+				string mobileNumber = sheet.Cells[rowIndex, 10].StringValue.Trim();
 				if (!string.IsNullOrEmpty(mobileNumber))
 				{
 					string location = string.Empty;
@@ -114,14 +114,25 @@ namespace SWS_IP_Location
             Worksheet sheet = workbook.Worksheets[0];
 
             List<string> locationList = new List<string>();
+            Dictionary<string, string> dict = new Dictionary<string, string>();
 
             int rowIndex = 1;
             while (sheet.Cells[rowIndex, 2].Value != null)
             {
                 string ipaddress = sheet.Cells[rowIndex, 1].StringValue;
-				if (string.IsNullOrEmpty(sheet.Cells[rowIndex, 0].StringValue))
+				if (string.IsNullOrEmpty(sheet.Cells[rowIndex, 0].StringValue.Trim()))
 				{
-					string result = IPLocationUtil.GetIPLocation(ipaddress);
+                    string result = string.Empty;
+                    if (dict.ContainsKey(ipaddress))
+                    {
+                        result = dict[ipaddress];
+                    }
+                    else
+                    {
+                        result = IPLocationUtil.GetIPLocation(ipaddress);
+                        dict.Add(ipaddress, result);
+                    }
+                        
 					sheet.Cells[rowIndex, 0].PutValue(result);
 					if (rowIndex % 10 == 0)
 					{

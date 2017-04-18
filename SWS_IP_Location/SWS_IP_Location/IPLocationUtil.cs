@@ -19,7 +19,7 @@ namespace SWS_IP_Location
 		{
 			bool success = false;
 			string location = "";
-
+            int errorCount = 0;
 			while (!success)
 			{
 				try
@@ -52,9 +52,19 @@ namespace SWS_IP_Location
 				}
 				catch (Exception ex)
 				{
-					success = false;
-					Thread.Sleep(500);
-				}
+                    errorCount++;
+                       success = false;
+                    if (errorCount < 5)
+                    {
+
+                        Thread.Sleep(500);
+
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
 			}
 			return location;
 		}
