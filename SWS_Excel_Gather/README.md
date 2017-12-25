@@ -1,4 +1,6 @@
 ## 使用说明
+下载 [ExcelGather](https://github.com/daizhen/Misc_Utils/blob/master/SWS_Excel_Gather/Dists/ExcelGather.zip).
+解压后运行 ExcelGather.exe
 ### 目录结构： 文件按照月份进行存放。
         根目录
             1月
