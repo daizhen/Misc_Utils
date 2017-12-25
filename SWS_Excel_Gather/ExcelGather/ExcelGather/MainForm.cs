@@ -28,31 +28,50 @@ namespace ExcelGather
 
         private void button1_Click(object sender, EventArgs e)
         {
+            //Workbook currentWorkbook = new Workbook();
+            //currentWorkbook.Open("2015_New.xls");
+
+            //int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
 
 
 
-			Workbook currentWorkbook = new Workbook();
-			currentWorkbook.Open("2015_New.xls");
+            ////string folder = @"C:\Users\dz\Downloads\凭证购买2015\{0}月凭证领用";
+            ////string resultFileName = "2015.xls";
 
-			int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
-			
+            ////int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
+            //foreach (int month in monthList)
+            //{
+            //	Worksheet sheet = currentWorkbook.Worksheets[month + "月"];
+            //	var items = GroupHandler.LoadMonthData(sheet);
+            //	GroupHandler.Export(items, "2015_New2.xls", month);
+            //}
+            //if (GetherData(textBoxDir.Text, textBoxDestDir.Text))
+            //{
+            //    MessageBox.Show("操作成功");
+            //}
 
+            MergeByMonthFolders(textBoxDir.Text, textBoxDestDir.Text);
 
-			//string folder = @"C:\Users\dz\Downloads\凭证购买2015\{0}月凭证领用";
-			//string resultFileName = "2015.xls";
+        }
 
-			//int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8,9,10,11,12 };
-			foreach (int month in monthList)
-			{
-				Worksheet sheet = currentWorkbook.Worksheets[month + "月"];
-				var items = GroupHandler.LoadMonthData(sheet);
-				GroupHandler.Export(items, "2015_New2.xls", month);
-			}
-			//if (GetherData(textBoxDir.Text, textBoxDestDir.Text))
-			//{
-			//	MessageBox.Show("操作成功");
-			//}
-		}
+        /// <summary>
+        /// 按月份文件夹存放文件。
+        /// </summary>
+        private void MergeByMonthFolders(string dirPath, string destDirPath)
+        {
+            int[] monthList = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            Dictionary<int, List<RequestItem>> monthItems = new Dictionary<int, List<RequestItem>>();
+            GroupHandler.ErrorMessage = new StringBuilder();
+            foreach (int month in monthList)
+            {
+                string currentFolderName = dirPath + "/" + month + "月";
+                DirectoryInfo dir = new DirectoryInfo(currentFolderName);
+                var items = GroupHandler.LoadItems(month, currentFolderName);
+                monthItems.Add(month, items);
+            }
+            GroupHandler.Export(monthItems, destDirPath+"/Result.xls");
+            richTextBoxResult.Text = GroupHandler.ErrorMessage.ToString();
+        }
 
         private bool GetherData(string dirPath,string destDirPath)
         {

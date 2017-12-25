@@ -9,6 +9,7 @@ namespace ExcelGather
 {
 	public class GroupHandler
 	{
+        public static StringBuilder ErrorMessage = new StringBuilder();
 		public static Dictionary<string, int> LoadBrancheNameIds()
 		{
 			string[] noisyWords = new string[] { "营业部", "营业", "证券", "西南总部", "管理部", "投资部", "资产" };
@@ -17,22 +18,24 @@ namespace ExcelGather
 			Dictionary<string, int> branches = new Dictionary<string, int>();
 
 			Workbook currentWorkbook = new Workbook();
-			currentWorkbook.Open(fileName);
-			Worksheet sheet = currentWorkbook.Worksheets[0];
-
-			for (var i = 1; i < 127; i++)
-			{
-				string netName = sheet.Cells[i, 1].StringValue;
-				foreach (var word in noisyWords)
-				{
-					netName = netName.Replace(word, string.Empty);
-				}
-				if (!string.IsNullOrEmpty(netName))
-				{
-					branches.Add(netName, sheet.Cells[i, 0].IntValue);
-				}
-			}
-			return branches;
+            currentWorkbook.Open(fileName);
+            Worksheet sheet = currentWorkbook.Worksheets[0];
+            int i = 1;
+            string netName = sheet.Cells[i, 1].StringValue;
+            while (!string.IsNullOrEmpty(netName))
+            {
+                foreach (var word in noisyWords)
+                {
+                    netName = netName.Replace(word, string.Empty);
+                }
+                if (!string.IsNullOrEmpty(netName))
+                {
+                    branches.Add(netName, sheet.Cells[i, 0].IntValue);
+                }
+                i++;
+                netName = sheet.Cells[i, 1].StringValue;
+            }
+            return branches;
 		}
 
 		public static Dictionary<string, int> LoadBrancheFullNameIds()
@@ -43,12 +46,14 @@ namespace ExcelGather
 			Workbook currentWorkbook = new Workbook();
 			currentWorkbook.Open(fileName);
 			Worksheet sheet = currentWorkbook.Worksheets[0];
-
-			for (var i = 1; i < 127; i++)
-			{
-				string netName = sheet.Cells[i, 1].StringValue;
+            int i = 1;
+            string netName = sheet.Cells[i, 1].StringValue;
+            while (!string.IsNullOrEmpty(netName))
+            {
 				branches.Add(netName, sheet.Cells[i, 0].IntValue);
-			}
+                i++;
+                netName = sheet.Cells[i, 1].StringValue;
+            }
 			return branches;
 		} 
 
@@ -61,11 +66,15 @@ namespace ExcelGather
 			currentWorkbook.Open(fileName);
 			Worksheet sheet = currentWorkbook.Worksheets[0];
 
-			for (var i = 1; i < 127; i++)
-			{
-				branches.Add(sheet.Cells[i, 0].IntValue, sheet.Cells[i, 1].StringValue);
-			}
-			return branches;
+            int i = 1;
+            string netName = sheet.Cells[i, 1].StringValue;
+            while (!string.IsNullOrEmpty(netName))
+            {
+                branches.Add(sheet.Cells[i, 0].IntValue, sheet.Cells[i, 1].StringValue);
+                i++;
+                netName = sheet.Cells[i, 1].StringValue;
+            }
+            return branches;
 		}
 
 
@@ -129,7 +138,8 @@ namespace ExcelGather
 						else
 						{
 							requestItem.SerialNum = "-" + id;
-							Console.WriteLine("Id of :" + id + " not valid --" + fileName);
+                            ErrorMessage.AppendLine("机构编码错误 :" + id + " -->" + fileName);
+                            Console.WriteLine("机构编码错误 :" + id + " -->" + fileName);
 						}
 					}
 
@@ -146,7 +156,8 @@ namespace ExcelGather
 					}
 					else
 					{
-						Console.WriteLine("Name Error:" + fileName);
+                        ErrorMessage.AppendLine("名称错误，没有以【 营业部名称(签章)：】开头:" + fileName);
+                        Console.WriteLine("名称错误，没有以【 营业部名称(签章)：】开头:" + fileName);
 					}
 					//Set Full Name
 					if (string.IsNullOrEmpty(requestItem.SerialNum) || requestItem.SerialNum.StartsWith("-"))
@@ -171,19 +182,32 @@ namespace ExcelGather
 					//Set Money
 
 					double money = 0.0;
-					if (!IsValidMoneyValue(sheet.Cells[37, 2].StringValue, out money))
-					{
-						if (!IsValidMoneyValue(sheet.Cells[36, 12].StringValue, out money))
-						{
-							if (!IsValidMoneyValue(sheet.Cells[36, 11].StringValue, out money))
-							{
-								IsValidMoneyValue(sheet.Cells[36, 9].StringValue, out money);
-							}
-						}
-					}
+                    int sumMoneyRowIndex = 0;
+                    while (sheet.Cells[sumMoneyRowIndex, 0].StringValue != "总计金额")
+                    {
+                        sumMoneyRowIndex++;
+                        if (sumMoneyRowIndex > 2000)
+                        {
+                            break;
+                        }
+                    }
+                    if (!IsValidMoneyValue(sheet.Cells[sumMoneyRowIndex, 2].StringValue, out money))
+                    {
+                        if (!IsValidMoneyValue(sheet.Cells[37, 2].StringValue, out money))
+                        {
+                            if (!IsValidMoneyValue(sheet.Cells[36, 12].StringValue, out money))
+                            {
+                                if (!IsValidMoneyValue(sheet.Cells[36, 11].StringValue, out money))
+                                {
+                                    IsValidMoneyValue(sheet.Cells[36, 9].StringValue, out money);
+                                }
+                            }
+                        }
+                    }
 					if (money == 0.0)
-					{
-						Console.WriteLine("Money  Convert Error:" + fileName);
+                    {
+                        ErrorMessage.AppendLine("金额提取错误,或金额为0:" + fileName);
+                        Console.WriteLine("Money  Convert Error:" + fileName);
 					}
 					requestItem.Money = money;
 					items.Add(requestItem);
@@ -192,11 +216,17 @@ namespace ExcelGather
 			return items;
 		}
 
+        /// <summary>
+        /// 按月导出
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="fileName"></param>
+        /// <param name="month"></param>
 		public static void Export(List<RequestItem> items, string fileName, int month)
 		{
 			string sheetName = month + "月";
 			Workbook currentWorkbook = new Workbook();
-			currentWorkbook.Open(fileName);
+			//currentWorkbook.Open(fileName);
 			Worksheet sheet = currentWorkbook.Worksheets[sheetName];
 			if (sheet == null)
 			{
@@ -219,26 +249,125 @@ namespace ExcelGather
 
 			}
 
-			//Add items to summary sheet
+            //Add items to summary sheet
 
-			Worksheet sheetSummary = currentWorkbook.Worksheets["Summary"];	
-			for (int i = 1; i <= 127; i++)
+            var branchs = LoadBrancheIdNames();
+            Worksheet sheetSummary = currentWorkbook.Worksheets["Summary"];
+            if (sheetSummary == null)
+            {
+                currentWorkbook.Worksheets.Add("Summary");
+                sheetSummary = currentWorkbook.Worksheets["Summary"];
+                sheetSummary.Cells[0, 0].PutValue("分支结构");
+                sheetSummary.Cells[0, 1].PutValue("编码");
+                for (int i = 0; i < 12; i++)
+                {
+                    sheetSummary.Cells[0, i+2].PutValue(string.Format("{0}月",i+1));
+                }
+                int rowIndex = 0;
+                foreach(var key in branchs.Keys)
+                {
+                    sheetSummary.Cells[rowIndex + 1, 0].PutValue(branchs[key]);
+                    sheetSummary.Cells[rowIndex + 1, 1].PutValue(key);
+                    rowIndex++;
+                }
+            }
+
+            for (int i = 1; i <= branchs.Keys.Count; i++)
 			{
-				var list = items.FindAll(p => p.SerialNum == sheetSummary.Cells[i, 0].StringValue);
+				var list = items.FindAll(p =>Convert.ToInt32( p.SerialNum) == sheetSummary.Cells[i, 1].IntValue);
 				double resultValue =Sum(list);
 				if (resultValue != 0)
 				{
-					sheetSummary.Cells[i, month + 1].PutValue(resultValue);
+					sheetSummary.Cells[i, month + 2].PutValue(resultValue);
 				}
 				else
 				{
-					sheetSummary.Cells[i, month + 1].PutValue(null);
+					sheetSummary.Cells[i, month + 2].PutValue(null);
 				}
 			}
 			currentWorkbook.Save(fileName);
 		}
 
-		public static double Sum(List<RequestItem> items)
+        public static void Export(Dictionary<int,List<RequestItem>> items, string fileName)
+        {
+            Workbook currentWorkbook = new Workbook();
+
+            for (int month = 1; month <= 12; month++)
+            {
+                if (items.ContainsKey(month))
+                {
+                    var monthItems = items[month];
+                    string sheetName = month + "月";
+                    //currentWorkbook.Open(fileName);
+                    Worksheet sheet = currentWorkbook.Worksheets[sheetName];
+                    if (sheet == null)
+                    {
+                        currentWorkbook.Worksheets.Add(sheetName);
+                        sheet = currentWorkbook.Worksheets[sheetName];
+                    }
+                    sheet.Cells[0, 0].PutValue("原名称");
+                    sheet.Cells[0, 1].PutValue("文件名");
+                    sheet.Cells[0, 2].PutValue("标准名称");
+                    sheet.Cells[0, 3].PutValue("编号");
+                    sheet.Cells[0, 4].PutValue("钱");
+
+                    for (int i = 0; i < monthItems.Count; i++)
+                    {
+                        sheet.Cells[i + 1, 0].PutValue(monthItems[i].RawName);
+                        sheet.Cells[i + 1, 1].PutValue(monthItems[i].FileName);
+                        sheet.Cells[i + 1, 2].PutValue(monthItems[i].FullName);
+                        sheet.Cells[i + 1, 3].PutValue(monthItems[i].SerialNum);
+                        sheet.Cells[i + 1, 4].PutValue(monthItems[i].Money);
+                    }
+                }
+            }
+
+            //Add items to summary sheet
+
+            var branchs = LoadBrancheIdNames();
+            Worksheet sheetSummary = currentWorkbook.Worksheets["Summary"];
+            if (sheetSummary == null)
+            {
+                currentWorkbook.Worksheets.Add("Summary");
+                sheetSummary = currentWorkbook.Worksheets["Summary"];
+               
+            }
+
+            sheetSummary.Cells[0, 0].PutValue("分支结构");
+            sheetSummary.Cells[0, 1].PutValue("编码");
+            for (int i = 0; i < 12; i++)
+            {
+                sheetSummary.Cells[0, i + 2].PutValue(string.Format("{0}月", i + 1));
+            }
+            int rowIndex = 0;
+            foreach (var key in branchs.Keys)
+            {
+                sheetSummary.Cells[rowIndex + 1, 0].PutValue(branchs[key]);
+                sheetSummary.Cells[rowIndex + 1, 1].PutValue(key);
+                rowIndex++;
+            }
+
+            for (int month = 1; month <= 12; month++)
+            {
+                var monthItems = items[month];
+                for (int i = 1; i <= branchs.Keys.Count; i++)
+                {
+                    var list = monthItems.FindAll(p => Convert.ToInt32(p.SerialNum) == sheetSummary.Cells[i, 1].IntValue);
+                    double resultValue = Sum(list);
+                    if (resultValue != 0)
+                    {
+                        sheetSummary.Cells[i, month + 1].PutValue(resultValue);
+                    }
+                    else
+                    {
+                        sheetSummary.Cells[i, month + 1].PutValue(null);
+                    }
+                }
+            }
+            currentWorkbook.Save(fileName);
+        }
+
+        public static double Sum(List<RequestItem> items)
 		{
 			double money = 0;
 			foreach (var item in items)
